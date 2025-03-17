@@ -6,28 +6,23 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.Date;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="tb_pautas")
-public class Pauta {
+@Table(name="tb_usuarios")
+public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_pauta", nullable = false)
+    @Column(name = "id_usuario", nullable = false)
     private Long id;
 
     @NotBlank(message = "Nome não pode ser vazio.")
-    @Column(name = "ds_pauta", nullable = false)
+    @Column(name = "nm_usuario", nullable = false)
     private String nome;
 
-    @Column(name = "dt_inicio", nullable = false)
-    private LocalDateTime horaInicio;
-
-    @Column(name = "nr_duracao", nullable = false)
-    private int duracao = 1;
+    @NotBlank(message = "CPF não pode ser vazio.")
+    @Column(name = "nr_cpf", nullable = false)
+    private String cpf;
 }

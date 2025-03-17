@@ -1,48 +1,70 @@
 package br.com.edujguerra.msvotacao.service;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
+import br.com.edujguerra.msvotacao.model.Pauta;
 import br.com.edujguerra.msvotacao.model.Usuario;
-import br.com.edujguerra.msvotacao.repository.UsuarioRepository;
+import br.com.edujguerra.msvotacao.model.Voto;
+import br.com.edujguerra.msvotacao.repository.VotoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+
 @Service
-public class UsuarioServiceImpl implements UsuarioService {
+public class VotoServiceImpl implements VotoService {
 
-    private final UsuarioRepository usuarioRepository;
+    private final VotoRepository votoRepository;
+    private final PautaServiceImpl pautaServiceImpl;
+    private final UsuarioServiceImpl usuarioServiceImpl;
 
-    public UsuarioServiceImpl(UsuarioRepository repository) {
-        this.usuarioRepository = repository;
+    public VotoServiceImpl(VotoRepository repository, PautaServiceImpl pautaServiceImpl, UsuarioServiceImpl usuarioServiceImpl) {
+        this.votoRepository = repository;
+        this.pautaServiceImpl = pautaServiceImpl;
+        this.usuarioServiceImpl = usuarioServiceImpl;
     }
 
-    public List<Usuario> buscarTodos() {
-        return usuarioRepository.findAll();
+    public List<Voto> buscarTodos() {
+        return votoRepository.findAll();
     }
 
-    public Usuario salvar(Usuario usuario) {
+    public Voto salvar(Voto voto) {
 
-        ResponseEntity<Object> response = validaCampos(usuario);
+        ResponseEntity<Object> response = validaCampos(voto);
         if (!response.getStatusCode().equals(HttpStatus.OK)  ){
-            throw new NoSuchElementException("Usuário com problemas..." + response);
+            throw new NoSuchElementException("Voto com problemas..." + response);
         }
 
-        usuario = usuarioRepository.save(usuario);
-        return usuario;
+        voto = votoRepository.save(voto);
+        return voto;
     }
 
-    private ResponseEntity<Object> validaCampos(Usuario usuario) {
+    private ResponseEntity<Object> validaCampos(Voto voto) {
 
-        if (usuario.getNome() == null
-                || usuario.getNome().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Nome não pode ser vazio.");
+        if (voto.getPauta() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Pauta não pode ser vazia.");
         }
-        if (usuario.getCpf() == null ||
-                usuario.getCpf().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CPF não pode ser vazio.");
+
+        if (voto.getUsuario() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário não pode ser vazio.");
         }
+        if (voto.getStVoto() == null ||
+                voto.getStVoto().isEmpty() ||
+                (!voto.getStVoto().equals("S") && !voto.getStVoto().equals("N"))) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Voto não pode ser vazio, e valores devem ser S ou N.");
+        }
+
+        ResponseEntity<Object> pauta =pautaServiceImpl.buscarUm(voto.getPauta().getId());
+        if (pauta.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pauta não encontrada.");
+        }
+        voto.setPauta((Pauta) pauta.getBody());
+
+        ResponseEntity<Object> usuario =usuarioServiceImpl.buscarUm(voto.getUsuario().getId());
+        if (usuario.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
+        }
+        voto.setUsuario((Usuario) usuario.getBody());
 
         try {
             //String uriCep = "https://viacep.com.br/ws/" + cliente.getCep() + "/json/";
@@ -52,25 +74,25 @@ public class UsuarioServiceImpl implements UsuarioService {
         } catch (Exception err) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cep não encontrado. ");
         }
-        return ResponseEntity.ok(usuario);
+        return ResponseEntity.ok(voto);
     }
 
     public ResponseEntity<Object> buscarUm(Long id ) {
 
-        Usuario usuario = usuarioRepository.findById(id).orElse(null);
+        Voto voto = votoRepository.findById(id).orElse(null);
 
-        if (usuario != null) {
-            return ResponseEntity.ok(usuario);
+        if (voto != null) {
+            return ResponseEntity.ok(voto);
         } else {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Usuário não encontrado.");
+                    .body("Voto não encontrado.");
         }
     }
 
-    public ResponseEntity<Object> atualizar(Long id, Usuario novo) {
+    public ResponseEntity<Object> atualizar(Long id, Voto novo) {
 
-        Usuario existente = usuarioRepository.findById(id).orElse(null);
+        Voto existente = votoRepository.findById(id).orElse(null);
 
         if (existente != null) {
             ResponseEntity<Object> response = validaCampos(novo);
@@ -78,28 +100,29 @@ public class UsuarioServiceImpl implements UsuarioService {
                 return response;
             }
 
-            existente.setNome(novo.getNome());
-            existente.setCpf(novo.getCpf());
+            existente.setUsuario(novo.getUsuario());
+            existente.setPauta(novo.getPauta());
+            existente.setStVoto(novo.getStVoto());
 
-            return ResponseEntity.ok(usuarioRepository.save(existente));
+            return ResponseEntity.ok(votoRepository.save(existente));
         } else {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Usuário não encontrado.");
+                    .body("Voto não encontrado.");
         }
     }
 
     public ResponseEntity<Object> excluir(Long id) {
 
-        Usuario existente = usuarioRepository.findById(id).orElse(null);
+        Voto existente = votoRepository.findById(id).orElse(null);
 
         if (existente != null) {
-            usuarioRepository.delete(existente);
-            return ResponseEntity.ok("Usuário deletado");
+            votoRepository.delete(existente);
+            return ResponseEntity.ok("Voto deletado");
         } else {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Usuário não encontrado.");
+                    .body("Voto não encontrado.");
         }
 
     }

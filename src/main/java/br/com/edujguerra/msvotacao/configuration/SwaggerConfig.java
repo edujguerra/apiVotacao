@@ -1,4 +1,4 @@
-package br.com.fiap.mscliente.configuration;
+package br.com.edujguerra.msvotacao.configuration;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

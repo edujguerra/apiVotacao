@@ -1,9 +1,7 @@
 package br.com.edujguerra.msvotacao.controller;
 
-import br.com.edujguerra.msvotacao.model.Pauta;
-import br.com.edujguerra.msvotacao.model.Usuario;
-import br.com.edujguerra.msvotacao.service.PautaServiceImpl;
-import br.com.edujguerra.msvotacao.service.UsuarioServiceImpl;
+import br.com.edujguerra.msvotacao.model.Voto;
+import br.com.edujguerra.msvotacao.service.VotoServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,43 +9,31 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pautas")
-public class PautaController {
+@RequestMapping("/api/votos")
+public class VotoController {
 
-    private final PautaServiceImpl service;
+    private final VotoServiceImpl service;
 
-    public PautaController(PautaServiceImpl service) {
+    public VotoController(VotoServiceImpl service) {
         this.service = service;
     }
 
     @GetMapping
-    public List<Pauta> buscarTodos() {
+    public List<Voto> buscarTodos() {
 
         return service.buscarTodos();
     }
 
     @PostMapping
-    public ResponseEntity<Object> salvar(@RequestBody Pauta pauta){
+    public ResponseEntity<Object> salvar(@RequestBody Voto voto){
 
-        pauta = service.salvar(pauta);
-        return new ResponseEntity<>(pauta, HttpStatus.CREATED);
+        voto = service.salvar(voto);
+        return new ResponseEntity<>(voto, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> buscarUm(@PathVariable Long id) {
 
         return service.buscarUm(id);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> atualizar(@PathVariable Long id, @RequestBody Pauta novo) {
-
-        return service.atualizar(id,novo);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Object> excluir(@PathVariable Long id) {
-
-        return service.excluir(id);
     }
 }

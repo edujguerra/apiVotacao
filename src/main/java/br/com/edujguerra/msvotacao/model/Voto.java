@@ -7,27 +7,27 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="tb_pautas")
-public class Pauta {
+@Table(name="tb_votos")
+public class Voto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_pauta", nullable = false)
+    @Column(name = "id_voto", nullable = false)
     private Long id;
 
-    @NotBlank(message = "Nome não pode ser vazio.")
-    @Column(name = "ds_pauta", nullable = false)
-    private String nome;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_pauta", nullable = false)
+    private Pauta pauta;
 
-    @Column(name = "dt_inicio", nullable = false)
-    private LocalDateTime horaInicio;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
 
-    @Column(name = "nr_duracao", nullable = false)
-    private int duracao = 1;
+    @Column(name = "st_voto", nullable = false)
+    private String stVoto;
 }
