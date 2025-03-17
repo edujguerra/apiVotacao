@@ -1,0 +1,12 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    url: jdbc:sqlserver://dbguerra.database.windows.net; databaseName=dbguerra
+    username: edujguerra
+    password: Teste@0605
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.SQLServerDialect
